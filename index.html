@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Liujiandi 的百宝箱</title>
+    <!-- 引入 Tailwind CSS (样式库) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入图标库 (Phosphor Icons) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        /* 优化字体：优先使用系统自带的中文字体，加载最快 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+            background-color: #f3f4f6;
+            /* 防止手机上点击出现高亮背景 */
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* 隐藏滚动条但保留功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* 简单的页面切换动画 */
+        .app-view {
+            transition: all 0.3s ease-in-out;
+        }
+        .hidden-app {
+            display: none;
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        .active-app {
+            display: flex;
+            opacity: 1;
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="text-gray-800 select-none"> <!-- select-none 防止长按选中文字，更像App -->
+
+    <!-- 1. 网页导航栏 -->
+    <nav class="bg-white shadow-sm fixed w-full z-10 top-0">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xl mr-2">L</div>
+                        <span class="font-bold text-xl tracking-tight text-indigo-900">Liujiandi</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">WebOS v2.1 CN</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 2. 主区域 -->
+    <section class="pt-24 pb-12 min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 flex items-center justify-center">
+        <div class="w-full max-w-4xl px-4 flex flex-col md:flex-row items-center gap-12">
+            
+            <!-- 左侧：文字介绍 -->
+            <div class="text-center md:text-left md:w-1/2">
+                <h1 class="text-4xl font-extrabold text-gray-900 mb-4">
+                    Liujiandi 的<br>
+                    <span class="text-indigo-600">万能百宝箱</span>
+                </h1>
+                <p class="text-gray-500 text-lg mb-8">
+                    这是一个完全运行在浏览器里的“微型操作系统”。集成了效率工具、计算和决策助手。不需要下载安装，点开即用。
+                </p>
+                <div class="hidden md:block p-4 bg-white rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-gray-800 mb-2">包含工具：</h3>
+                    <div class="flex gap-3 text-2xl text-gray-600">
+                        <i class="ph ph-check-square" title="待办"></i>
+                        <i class="ph ph-timer" title="专注"></i>
+                        <i class="ph ph-calculator" title="计算器"></i>
+                        <i class="ph ph-magic-wand" title="决策"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：手机模拟器 (核心功能区) -->
+            <div class="relative mx-auto border-gray-800 bg-gray-800 border-[14px] rounded-[2.5rem] h-[600px] w-[300px] shadow-xl flex flex-col overflow-hidden ring-8 ring-gray-200/50">
+                <!-- 手机刘海/听筒 -->
+                <div class="h-[32px] bg-gray-800 w-full absolute top-0 left-0 z-20 flex justify-center rounded-t-[2rem]">
+                     <div class="h-4 w-32 bg-black rounded-b-xl"></div>
+                </div>
+
+                <!-- 屏幕区域 -->
+                <div class="w-full h-full bg-slate-100 relative overflow-hidden flex flex-col">
+                    
+                    <!-- 状态栏 -->
+                    <div class="px-5 pt-3 pb-1 flex justify-between items-center text-[10px] font-medium text-gray-800 z-10 bg-slate-100/80 backdrop-blur-sm">
+                        <span id="clock-time">12:00</span>
+                        <div class="flex gap-1">
+                            <i class="ph-fill ph-wifi-high"></i>
+                            <i class="ph-fill ph-battery-full"></i>
+                        </div>
+                    </div>
+
+                    <!-- === 界面 1: 桌面 (Home Screen) === -->
+                    <div id="view-home" class="app-view active-app flex-1 p-5 flex flex-col">
+                        <div class="mt-4 mb-8">
+                            <h2 class="text-2xl font-bold text-gray-800">下午好</h2>
+                            <p class="text-gray-500 text-sm">今天想做点什么？</p>
+                        </div>
+                        
+                        <!-- App 图标网格 -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- App 1: 待办 -->
+                            <button onclick="openApp('todo')" class="bg-white p-4 rounded-2xl shadow-sm hover:shadow-md transition active:scale-95 flex flex-col items-center gap-2 aspect-square justify-center">
+                                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl">
+                                    <i class="ph-fill ph-check-square"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">记事本</span>
+                            </button>
+
+                            <!-- App 2: 番茄钟 -->
+                            <button onclick="openApp('timer')" class="bg-white p-4 rounded-2xl shadow-sm hover:shadow-md transition active:scale-95 flex flex-col items-center gap-2 aspect-square justify-center">
+                                <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-2xl">
+                                    <i class="ph-fill ph-timer"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">专注时钟</span>
+                            </button>
+
+                            <!-- App 3: 计算器 -->
+                            <button onclick="openApp('calc')" class="bg-white p-4 rounded-2xl shadow-sm hover:shadow-md transition active:scale-95 flex flex-col items-center gap-2 aspect-square justify-center">
+                                <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-2xl">
+                                    <i class="ph-fill ph-calculator"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">计算器</span>
+                            </button>
+
+                            <!-- App 4: 决策助手 -->
+                            <button onclick="openApp('decision')" class="bg-white p-4 rounded-2xl shadow-sm hover:shadow-md transition active:scale-95 flex flex-col items-center gap-2 aspect-square justify-center">
+                                <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-2xl">
+                                    <i class="ph-fill ph-magic-wand"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">帮你决定</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- === 界面 2: 记事本 App === -->
+                    <div id="view-todo" class="app-view hidden-app flex-col h-full bg-white absolute inset-0 z-20 pt-8">
+                        <!-- 头部 -->
+                        <div class="px-4 py-3 border-b flex items-center gap-2 bg-white">
+                            <button onclick="goHome()" class="p-2 hover:bg-gray-100 rounded-full"><i class="ph ph-caret-left text-xl"></i></button>
+                            <span class="font-bold text-lg">记事本</span>
+                        </div>
+                        <!-- 内容 -->
+                        <div class="flex-1 overflow-y-auto p-4 bg-gray-50">
+                            <div class="flex gap-2 mb-4">
+                                <input type="text" id="todo-input" placeholder="输入待办..." class="flex-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none select-text">
+                                <button onclick="addTodo()" class="bg-blue-600 text-white px-3 rounded-lg"><i class="ph-bold ph-plus"></i></button>
+                            </div>
+                            <ul id="todo-list" class="space-y-2 select-text">
+                                <!-- JS 生成列表 -->
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- === 界面 3: 专注时钟 App === -->
+                    <div id="view-timer" class="app-view hidden-app flex-col h-full bg-red-50 absolute inset-0 z-20 pt-8">
+                        <div class="px-4 py-3 flex items-center gap-2">
+                            <button onclick="goHome()" class="p-2 hover:bg-red-100 rounded-full text-red-900"><i class="ph ph-caret-left text-xl"></i></button>
+                            <span class="font-bold text-lg text-red-900">专注模式</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                            
+                            <!-- 修改部分：增加了左右调整时间的按钮 -->
+                            <div class="flex items-center justify-center gap-4 mb-8">
+                                <button onclick="adjustTime(-5)" class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-200 shadow-sm active:scale-90 transition" title="减少5分钟">
+                                    <i class="ph-bold ph-minus"></i>
+                                </button>
+
+                                <div class="w-48 h-48 rounded-full border-4 border-red-200 flex items-center justify-center bg-white shadow-lg relative">
+                                    <span id="timer-display" class="text-5xl font-mono font-bold text-red-600">25:00</span>
+                                    <span class="absolute bottom-8 text-xs text-gray-400">MINUTES</span>
+                                </div>
+
+                                <button onclick="adjustTime(5)" class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-200 shadow-sm active:scale-90 transition" title="增加5分钟">
+                                    <i class="ph-bold ph-plus"></i>
+                                </button>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <button onclick="startTimer()" id="btn-start" class="bg-red-600 text-white px-6 py-2 rounded-full font-bold shadow-lg active:scale-95 transition">开始</button>
+                                <button onclick="resetTimer()" class="bg-white text-red-600 border border-red-200 px-6 py-2 rounded-full font-bold shadow-sm active:scale-95 transition">重置</button>
+                            </div>
+                            <p class="mt-8 text-sm text-red-400">保持专注，把事情做完！</p>
+                        </div>
+                    </div>
+
+                    <!-- === 界面 4: 计算器 App === -->
+                    <div id="view-calc" class="app-view hidden-app flex-col h-full bg-gray-900 absolute inset-0 z-20 pt-8">
+                        <div class="px-4 py-3 flex items-center gap-2">
+                            <button onclick="goHome()" class="p-2 hover:bg-gray-700 rounded-full text-white"><i class="ph ph-caret-left text-xl"></i></button>
+                            <span class="font-bold text-lg text-white">计算器</span>
+                        </div>
+                        <div class="flex-1 flex flex-col p-4">
+                            <!-- 屏幕 -->
+                            <div class="bg-gray-800 rounded-xl h-24 mb-4 flex items-end justify-end p-4">
+                                <span id="calc-display" class="text-4xl text-white font-mono truncate">0</span>
+                            </div>
+                            <!-- 键盘 -->
+                            <div class="grid grid-cols-4 gap-3 flex-1">
+                                <button onclick="calcInput('C')" class="bg-gray-600 text-white rounded-lg font-bold text-lg">C</button>
+                                <button onclick="calcInput('/')" class="bg-orange-500 text-white rounded-lg font-bold text-lg">÷</button>
+                                <button onclick="calcInput('*')" class="bg-orange-500 text-white rounded-lg font-bold text-lg">×</button>
+                                <button onclick="calcInput('DEL')" class="bg-gray-600 text-white rounded-lg font-bold text-lg">←</button>
+                                
+                                <button onclick="calcInput('7')" class="bg-gray-700 text-white rounded-lg font-bold text-lg">7</button>
+                                <button onclick="calcInput('8')" class="bg-gray-700 text-white rounded-lg font-bold text-lg">8</button>
+                                <button onclick="calcInput('9')" class="bg-gray-700 text-white rounded-lg font-bold text-lg">9</button>
+                                <button onclick="calcInput('-')" class="bg-orange-500 text-white rounded-lg font-bold text-lg">-</button>
+                                
+                                <button onclick="calcInput('4')" class="bg-gray-700 text-white rounded-lg font-bold text-lg">4</button>
+                                <button onclick="calcInput('5')" class="bg-gray-700 text-white rounded-lg font-bold text-lg">5</button>
+                                <button onclick="calcInput('6')" class="bg-gray-700 text-white rounded-lg font-bold text-lg">6</button>
+                                <button onclick="calcInput('+')" class="bg-orange-500 text-white rounded-lg font-bold text-lg">+</button>
+                                
+                                <button onclick="calcInput('1')" class="bg-gray-700 text-white rounded-lg font-bold text-lg">1</button>
+                                <button onclick="calcInput('2')" class="bg-gray-700 text-white rounded-lg font-bold text-lg">2</button>
+                                <button onclick="calcInput('3')" class="bg-gray-700 text-white rounded-lg font-bold text-lg">3</button>
+                                <button onclick="calcResult()" class="bg-orange-600 text-white rounded-lg font-bold text-lg row-span-2 flex items-center justify-center">=</button>
+
+                                <button onclick="calcInput('0')" class="bg-gray-700 text-white rounded-lg font-bold text-lg col-span-2">0</button>
+                                <button onclick="calcInput('.')" class="bg-gray-700 text-white rounded-lg font-bold text-lg">.</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- === 界面 5: 决策助手 App === -->
+                    <div id="view-decision" class="app-view hidden-app flex-col h-full bg-purple-50 absolute inset-0 z-20 pt-8">
+                        <div class="px-4 py-3 flex items-center gap-2">
+                            <button onclick="goHome()" class="p-2 hover:bg-purple-100 rounded-full text-purple-900"><i class="ph ph-caret-left text-xl"></i></button>
+                            <span class="font-bold text-lg text-purple-900">帮你决定</span>
+                        </div>
+                        <div class="flex-1 p-5 flex flex-col">
+                            <p class="text-sm text-gray-500 mb-2">比如：吃面，吃米饭，吃汉堡</p>
+                            <textarea id="decision-input" class="w-full h-32 p-3 border rounded-xl text-sm mb-4 focus:ring-2 focus:ring-purple-500 outline-none resize-none select-text" placeholder="输入选项，用逗号或换行分开..."></textarea>
+                            
+                            <button onclick="makeDecision()" class="bg-purple-600 text-white py-3 rounded-xl font-bold shadow-md active:scale-95 transition mb-6">✨ 帮我选一个！</button>
+
+                            <div id="decision-result" class="hidden bg-white p-6 rounded-2xl shadow-lg text-center border-2 border-purple-100 transform transition-all">
+                                <p class="text-gray-400 text-xs uppercase tracking-wide mb-2">命运选择了</p>
+                                <h3 id="result-text" class="text-2xl font-extrabold text-purple-700"></h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 底部导航条 (Home Indicator) -->
+                    <div class="bg-transparent absolute bottom-0 w-full h-6 flex justify-center items-center z-50 cursor-pointer" onclick="goHome()">
+                        <div class="w-32 h-1 bg-gray-800 rounded-full opacity-20"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 逻辑脚本 -->
+    <script>
+        // --- 1. 系统/导航逻辑 ---
+        function openApp(appId) {
+            // 隐藏所有界面
+            document.querySelectorAll('.app-view').forEach(el => {
+                el.classList.remove('active-app', 'flex');
+                el.classList.add('hidden-app');
+            });
+            // 显示目标界面
+            const target = document.getElementById('view-' + appId);
+            target.classList.remove('hidden-app');
+            target.classList.add('active-app', 'flex');
+        }
+
+        function goHome() {
+            openApp('home');
+        }
+
+        // 更新顶部时间
+        setInterval(() => {
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('clock-time').textContent = timeString;
+        }, 1000);
+
+        // --- 2. 待办事项逻辑 ---
+        function addTodo() {
+            const input = document.getElementById('todo-input');
+            const list = document.getElementById('todo-list');
+            const text = input.value.trim();
+            if(!text) return;
+
+            const li = document.createElement('li');
+            li.className = 'bg-white p-3 rounded-lg shadow-sm flex items-center gap-3 animate-pulse';
+            li.style.animation = 'none'; 
+            li.innerHTML = `
+                <div class="w-5 h-5 rounded-full border-2 border-gray-300 cursor-pointer hover:border-blue-500" onclick="this.classList.toggle('bg-blue-500'); this.classList.toggle('border-blue-500'); this.nextElementSibling.classList.toggle('line-through'); this.nextElementSibling.classList.toggle('text-gray-400')"></div>
+                <span class="flex-1 text-sm text-gray-700">${text}</span>
+                <button onclick="this.parentElement.remove()" class="text-gray-300 hover:text-red-500">×</button>
+            `;
+            list.prepend(li);
+            input.value = '';
+        }
+
+        // --- 3. 番茄钟逻辑 ---
+        let timerInterval;
+        let defaultTime = 25 * 60; // 默认时间变量，方便重置时使用
+        let timeLeft = defaultTime; 
+        let isRunning = false;
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const s = (timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timer-display').textContent = `${m}:${s}`;
+        }
+
+        // 新增：调整时间的函数
+        function adjustTime(minutes) {
+            if(isRunning) {
+                alert("请先暂停或重置后再调整时间哦！");
+                return;
+            }
+            
+            // 计算新的时间（秒）
+            const newTime = timeLeft + (minutes * 60);
+
+            // 限制范围：最少 5 分钟，最多 120 分钟
+            if (newTime >= 5 * 60 && newTime <= 120 * 60) {
+                timeLeft = newTime;
+                defaultTime = newTime; // 记住这个新设定，重置时会回到这里
+                updateTimerDisplay();
+            }
+        }
+
+        function startTimer() {
+            if(isRunning) {
+                clearInterval(timerInterval);
+                document.getElementById('btn-start').textContent = '开始';
+                document.getElementById('btn-start').classList.remove('bg-yellow-500');
+                document.getElementById('btn-start').classList.add('bg-red-600');
+                isRunning = false;
+                return;
+            }
+            
+            isRunning = true;
+            document.getElementById('btn-start').textContent = '暂停';
+            document.getElementById('btn-start').classList.remove('bg-red-600');
+            document.getElementById('btn-start').classList.add('bg-yellow-500');
+
+            timerInterval = setInterval(() => {
+                if(timeLeft > 0) {
+                    timeLeft--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    alert("专注时间到！休息一下吧。");
+                    resetTimer();
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timeLeft = defaultTime; // 重置回用户设定的时间，而不是强制回到25分钟
+            isRunning = false;
+            updateTimerDisplay();
+            document.getElementById('btn-start').textContent = '开始';
+            document.getElementById('btn-start').classList.remove('bg-yellow-500');
+            document.getElementById('btn-start').classList.add('bg-red-600');
+        }
+
+        // --- 4. 计算器逻辑 ---
+        let calcBuffer = '';
+        function calcInput(val) {
+            if(val === 'C') {
+                calcBuffer = '';
+            } else if (val === 'DEL') {
+                calcBuffer = calcBuffer.slice(0, -1);
+            } else {
+                calcBuffer += val;
+            }
+            document.getElementById('calc-display').textContent = calcBuffer || '0';
+        }
+        function calcResult() {
+            try {
+                // 注意：eval在生产环境中不安全，但对于这个简单的个人百宝箱是可接受的
+                if(calcBuffer) {
+                    const res = eval(calcBuffer); 
+                    calcBuffer = String(res);
+                    document.getElementById('calc-display').textContent = calcBuffer;
+                }
+            } catch (e) {
+                document.getElementById('calc-display').textContent = 'Error';
+                setTimeout(() => { calcBuffer = ''; document.getElementById('calc-display').textContent = '0'; }, 1000);
+            }
+        }
+
+        // --- 5. 决策助手逻辑 ---
+        function makeDecision() {
+            const input = document.getElementById('decision-input').value;
+            // 支持逗号、空格或换行分隔
+            const options = input.split(/[,，\n]+/).map(s => s.trim()).filter(s => s);
+            
+            if(options.length < 2) {
+                alert("请至少输入两个选项哦！");
+                return;
+            }
+
+            const resultBox = document.getElementById('decision-result');
+            const resultText = document.getElementById('result-text');
+            
+            // 简单的随机动画效果
+            resultBox.classList.remove('hidden');
+            let count = 0;
+            const shuffle = setInterval(() => {
+                resultText.textContent = options[Math.floor(Math.random() * options.length)];
+                count++;
+                if(count > 10) {
+                    clearInterval(shuffle);
+                    resultText.classList.add('scale-110');
+                }
+            }, 100);
+        }
+    </script>
+</body>
+</html>
