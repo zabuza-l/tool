@@ -38,12 +38,38 @@
             opacity: 1;
             transform: scale(1);
         }
+        /* 摇一摇动画 */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .animate-shake {
+            animation: shake 0.5s;
+            animation-iteration-count: infinite;
+        }
+        /* 签掉出来的动画 */
+        @keyframes drop-in {
+            0% { transform: translateY(-50px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        .animate-drop {
+            animation: drop-in 0.5s ease-out forwards;
+        }
     </style>
 </head>
 <body class="text-gray-800 select-none"> <!-- select-none 防止长按选中文字，更像App -->
 
     <!-- 1. 网页导航栏 -->
-    <nav class="bg-white shadow-sm fixed w-full z-10 top-0">
+    <nav class="bg-white shadow-sm fixed w-full z-50 top-0">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
@@ -53,7 +79,7 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">WebOS v2.1 CN</span>
+                    <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">WebOS v2.2 CN</span>
                 </div>
             </div>
         </div>
@@ -66,16 +92,15 @@
             <!-- 左侧：文字介绍 -->
             <div class="text-center md:text-left md:w-1/2">
                 <h1 class="text-4xl font-extrabold text-gray-900 mb-4">
-                    Liujiandi 的<br>
-                    <span class="text-indigo-600">万能百宝箱</span>
+                    <span class="text-indigo-600">Liujiandi</span>
                 </h1>
                 <p class="text-gray-500 text-lg mb-8">
-                    这是一个完全运行在浏览器里的“微型操作系统”。集成了效率工具、计算和决策助手。不需要下载安装，点开即用。
+                    Don't let your dreams fade away
                 </p>
                 <div class="hidden md:block p-4 bg-white rounded-xl shadow-sm border border-gray-100">
                     <h3 class="font-bold text-gray-800 mb-2">包含工具：</h3>
                     <div class="flex gap-3 text-2xl text-gray-600">
-                        <i class="ph ph-check-square" title="待办"></i>
+                        <i class="ph ph-scroll" title="幸运签"></i> <!-- 更新图标 -->
                         <i class="ph ph-timer" title="专注"></i>
                         <i class="ph ph-calculator" title="计算器"></i>
                         <i class="ph ph-magic-wand" title="决策"></i>
@@ -111,12 +136,12 @@
                         
                         <!-- App 图标网格 -->
                         <div class="grid grid-cols-2 gap-4">
-                            <!-- App 1: 待办 -->
-                            <button onclick="openApp('todo')" class="bg-white p-4 rounded-2xl shadow-sm hover:shadow-md transition active:scale-95 flex flex-col items-center gap-2 aspect-square justify-center">
-                                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl">
-                                    <i class="ph-fill ph-check-square"></i>
+                            <!-- App 1: 幸运签 (替换了原来的记事本) -->
+                            <button onclick="openApp('lucky')" class="bg-white p-4 rounded-2xl shadow-sm hover:shadow-md transition active:scale-95 flex flex-col items-center gap-2 aspect-square justify-center">
+                                <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-2xl">
+                                    <i class="ph-fill ph-scroll"></i>
                                 </div>
-                                <span class="text-sm font-medium text-gray-700">记事本</span>
+                                <span class="text-sm font-medium text-gray-700">幸运签</span>
                             </button>
 
                             <!-- App 2: 番茄钟 -->
@@ -145,22 +170,59 @@
                         </div>
                     </div>
 
-                    <!-- === 界面 2: 记事本 App === -->
-                    <div id="view-todo" class="app-view hidden-app flex-col h-full bg-white absolute inset-0 z-20 pt-8">
+                    <!-- === 界面 2: 幸运签 App (新功能) === -->
+                    <div id="view-lucky" class="app-view hidden-app flex-col h-full bg-red-50 absolute inset-0 z-20 pt-8">
                         <!-- 头部 -->
-                        <div class="px-4 py-3 border-b flex items-center gap-2 bg-white">
-                            <button onclick="goHome()" class="p-2 hover:bg-gray-100 rounded-full"><i class="ph ph-caret-left text-xl"></i></button>
-                            <span class="font-bold text-lg">记事本</span>
+                        <div class="px-4 py-3 border-b flex items-center gap-2 bg-white/50 backdrop-blur-sm">
+                            <button onclick="goHome()" class="p-2 hover:bg-red-100 rounded-full text-red-800"><i class="ph ph-caret-left text-xl"></i></button>
+                            <span class="font-bold text-lg text-red-900">今日运势</span>
                         </div>
-                        <!-- 内容 -->
-                        <div class="flex-1 overflow-y-auto p-4 bg-gray-50">
-                            <div class="flex gap-2 mb-4">
-                                <input type="text" id="todo-input" placeholder="输入待办..." class="flex-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none select-text">
-                                <button onclick="addTodo()" class="bg-blue-600 text-white px-3 rounded-lg"><i class="ph-bold ph-plus"></i></button>
+                        
+                        <!-- 内容区域 -->
+                        <div class="flex-1 flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+                            
+                            <!-- 装饰背景 -->
+                            <div class="absolute top-10 left-10 text-red-200 text-6xl opacity-20"><i class="ph-fill ph-star"></i></div>
+                            <div class="absolute bottom-20 right-10 text-red-200 text-8xl opacity-20"><i class="ph-fill ph-sparkle"></i></div>
+
+                            <!-- 签筒区域 -->
+                            <div id="luck-container" class="relative mb-12 transition-transform">
+                                <!-- 签筒主体 -->
+                                <div class="w-32 h-40 bg-gradient-to-b from-red-700 to-red-900 rounded-b-3xl rounded-t-lg border-4 border-yellow-500 shadow-2xl flex items-center justify-center relative z-10">
+                                    <div class="w-20 h-20 bg-red-800 rounded-full flex items-center justify-center border-2 border-red-600">
+                                        <span class="text-yellow-500 font-bold text-3xl font-serif">福</span>
+                                    </div>
+                                </div>
+                                <!-- 签子 (装饰) -->
+                                <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 w-24 h-12 flex justify-center gap-1 z-0">
+                                    <div class="w-2 h-16 bg-yellow-200 rounded-t-sm transform -rotate-12 translate-y-2"></div>
+                                    <div class="w-2 h-16 bg-yellow-200 rounded-t-sm transform -rotate-6"></div>
+                                    <div class="w-2 h-16 bg-yellow-200 rounded-t-sm transform rotate-0 -translate-y-1"></div>
+                                    <div class="w-2 h-16 bg-yellow-200 rounded-t-sm transform rotate-6"></div>
+                                    <div class="w-2 h-16 bg-yellow-200 rounded-t-sm transform rotate-12 translate-y-2"></div>
+                                </div>
                             </div>
-                            <ul id="todo-list" class="space-y-2 select-text">
-                                <!-- JS 生成列表 -->
-                            </ul>
+
+                            <!-- 摇动时的文字提示 (闪烁) -->
+                            <div id="shuffling-text" class="h-8 text-red-400 font-bold text-lg mb-4 opacity-0"></div>
+
+                            <!-- 结果展示区 -->
+                            <div id="luck-result" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border-4 border-red-500 rounded-xl p-6 shadow-2xl z-50 w-64 animate-drop">
+                                <div class="text-red-600 text-sm mb-2 font-bold tracking-widest">RESULT</div>
+                                <h2 class="text-5xl font-extrabold text-red-600 mb-4 font-serif">上上签</h2>
+                                <div class="w-full h-0.5 bg-red-100 mb-4"></div>
+                                <p class="text-gray-600 text-sm leading-relaxed">
+                                    鸿运当头，万事胜意。<br>
+                                    所求皆如愿，所行化坦途。
+                                </p>
+                                <button onclick="resetLuck()" class="mt-6 bg-red-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg hover:bg-red-700 transition">收下好运</button>
+                            </div>
+
+                            <!-- 摇一摇按钮 -->
+                            <button id="btn-shake" onclick="drawLuck()" class="bg-red-600 text-white px-10 py-4 rounded-full font-bold text-xl shadow-lg active:scale-95 transition flex items-center gap-2 border-b-4 border-red-800">
+                                <i class="ph-bold ph-hand-waving"></i> 摇一摇
+                            </button>
+                            <p class="mt-4 text-xs text-red-400">心诚则灵 ✨</p>
                         </div>
                     </div>
 
@@ -290,24 +352,53 @@
             document.getElementById('clock-time').textContent = timeString;
         }, 1000);
 
-        // --- 2. 待办事项逻辑 ---
-        function addTodo() {
-            const input = document.getElementById('todo-input');
-            const list = document.getElementById('todo-list');
-            const text = input.value.trim();
-            if(!text) return;
+        // --- 2. 幸运签逻辑 (新替换的) ---
+        let isShaking = false;
+        
+        function drawLuck() {
+            if (isShaking) return;
+            isShaking = true;
+            
+            const container = document.getElementById('luck-container');
+            const btn = document.getElementById('btn-shake');
+            const resultBox = document.getElementById('luck-result');
+            const shuffleText = document.getElementById('shuffling-text');
+            
+            // 隐藏上次的结果
+            resultBox.classList.add('hidden');
+            
+            // 开始动画
+            container.classList.add('animate-shake');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            
+            // 文字闪烁效果：模拟很多种签
+            shuffleText.classList.remove('opacity-0');
+            const possibleSigns = ["中平", "小吉", "末吉", "中吉", "平签", "吉签"];
+            let shuffleInterval = setInterval(() => {
+                const randomSign = possibleSigns[Math.floor(Math.random() * possibleSigns.length)];
+                shuffleText.textContent = `... ${randomSign} ...`;
+            }, 100);
 
-            const li = document.createElement('li');
-            li.className = 'bg-white p-3 rounded-lg shadow-sm flex items-center gap-3 animate-pulse';
-            li.style.animation = 'none'; 
-            li.innerHTML = `
-                <div class="w-5 h-5 rounded-full border-2 border-gray-300 cursor-pointer hover:border-blue-500" onclick="this.classList.toggle('bg-blue-500'); this.classList.toggle('border-blue-500'); this.nextElementSibling.classList.toggle('line-through'); this.nextElementSibling.classList.toggle('text-gray-400')"></div>
-                <span class="flex-1 text-sm text-gray-700">${text}</span>
-                <button onclick="this.parentElement.remove()" class="text-gray-300 hover:text-red-500">×</button>
-            `;
-            list.prepend(li);
-            input.value = '';
+            // 2.5秒后停止
+            setTimeout(() => {
+                clearInterval(shuffleInterval);
+                container.classList.remove('animate-shake');
+                shuffleText.classList.add('opacity-0');
+                
+                // 显示最终结果 (永远是上上签)
+                resultBox.classList.remove('hidden');
+                
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+                isShaking = false;
+            }, 2000);
         }
+
+        function resetLuck() {
+            document.getElementById('luck-result').classList.add('hidden');
+        }
+
 
         // --- 3. 番茄钟逻辑 ---
         let timerInterval;
