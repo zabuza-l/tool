@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Liujiandi 的百宝箱</title>
+    <!-- 修改处 1：更改了网页标题 -->
+    <title>zabuza</title>
     <!-- 引入 Tailwind CSS (样式库) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 引入图标库 (Phosphor Icons) -->
@@ -79,7 +80,7 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">WebOS v2.2 CN</span>
+                    <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">WebOS v2.3 CN</span>
                 </div>
             </div>
         </div>
@@ -206,18 +207,6 @@
                             <!-- 摇动时的文字提示 (闪烁) -->
                             <div id="shuffling-text" class="h-8 text-red-400 font-bold text-lg mb-4 opacity-0"></div>
 
-                            <!-- 结果展示区 -->
-                            <div id="luck-result" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border-4 border-red-500 rounded-xl p-6 shadow-2xl z-50 w-64 animate-drop">
-                                <div class="text-red-600 text-sm mb-2 font-bold tracking-widest">RESULT</div>
-                                <h2 class="text-5xl font-extrabold text-red-600 mb-4 font-serif">上上签</h2>
-                                <div class="w-full h-0.5 bg-red-100 mb-4"></div>
-                                <p class="text-gray-600 text-sm leading-relaxed">
-                                    鸿运当头，万事胜意。<br>
-                                    所求皆如愿，所行化坦途。
-                                </p>
-                                <button onclick="resetLuck()" class="mt-6 bg-red-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg hover:bg-red-700 transition">收下好运</button>
-                            </div>
-
                             <!-- 摇一摇按钮 -->
                             <button id="btn-shake" onclick="drawLuck()" class="bg-red-600 text-white px-10 py-4 rounded-full font-bold text-xl shadow-lg active:scale-95 transition flex items-center gap-2 border-b-4 border-red-800">
                                 <i class="ph-bold ph-hand-waving"></i> 摇一摇
@@ -316,6 +305,23 @@
                         </div>
                     </div>
 
+                    <!-- 修改处：重构了结果展示区结构，使用 Flexbox 完美居中，避免动画冲突 -->
+                    <!-- 结果展示区 (全局弹窗容器) -->
+                    <div id="luck-result" class="hidden absolute inset-0 z-[60] flex items-center justify-center bg-black/10 backdrop-blur-[2px]">
+                        <!-- 实际的卡片内容 -->
+                        <div class="bg-white border-4 border-red-500 rounded-xl p-6 shadow-2xl w-64 animate-drop text-center relative">
+                            <div class="text-red-600 text-sm mb-2 font-bold tracking-widest">RESULT</div>
+                            <h2 class="text-5xl font-extrabold text-red-600 mb-4 font-serif">上上签</h2>
+                            <div class="w-full h-0.5 bg-red-100 mb-4"></div>
+                            <!-- 祝福语 -->
+                            <p id="luck-text" class="text-gray-600 text-sm leading-relaxed">
+                                鸿运当头，万事胜意。<br>
+                                所求皆如愿，所行化坦途。
+                            </p>
+                            <button onclick="resetLuck()" class="mt-6 bg-red-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg hover:bg-red-700 transition">收下好运</button>
+                        </div>
+                    </div>
+
                     <!-- 底部导航条 (Home Indicator) -->
                     <div class="bg-transparent absolute bottom-0 w-full h-6 flex justify-center items-center z-50 cursor-pointer" onclick="goHome()">
                         <div class="w-32 h-1 bg-gray-800 rounded-full opacity-20"></div>
@@ -355,6 +361,20 @@
         // --- 2. 幸运签逻辑 (新替换的) ---
         let isShaking = false;
         
+        // 修改处 4：定义 10 句上上签祝福语数组
+        const luckMessages = [
+            "鸿运当头，万事胜意。<br>所求皆如愿，所行化坦途。",
+            "吉星高照，福气满满。<br>顺风顺水，好运连连。",
+            "心想事成，无往不利。<br>前程似锦，未来可期。",
+            "天官赐福，百无禁忌。<br>事业有成，生活甜蜜。",
+            "时来运转，喜气洋洋。<br>身体健康，平安吉祥。",
+            "紫气东来，财源广进。<br>贵人相助，步步高升。",
+            "春风得意，马到成功。<br>学业进步，金榜题名。",
+            "喜从天降，好运挡不住。<br>天天开心，烦恼全无。",
+            "福星高照，诸事顺利。<br>爱情美满，家庭幸福。",
+            "大吉大利，万事亨通。<br>梦想成真，精彩人生。"
+        ];
+
         function drawLuck() {
             if (isShaking) return;
             isShaking = true;
@@ -363,6 +383,7 @@
             const btn = document.getElementById('btn-shake');
             const resultBox = document.getElementById('luck-result');
             const shuffleText = document.getElementById('shuffling-text');
+            const luckTextElement = document.getElementById('luck-text'); // 获取显示文字的元素
             
             // 隐藏上次的结果
             resultBox.classList.add('hidden');
@@ -386,6 +407,10 @@
                 container.classList.remove('animate-shake');
                 shuffleText.classList.add('opacity-0');
                 
+                // 修改处 5：随机选择一句祝福语并更新显示
+                const randomIndex = Math.floor(Math.random() * luckMessages.length);
+                luckTextElement.innerHTML = luckMessages[randomIndex];
+
                 // 显示最终结果 (永远是上上签)
                 resultBox.classList.remove('hidden');
                 
