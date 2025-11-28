@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- 修改处 1：更改了网页标题 -->
     <title>zabuza</title>
     <!-- 引入 Tailwind CSS (样式库) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -75,12 +74,14 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <div class="flex-shrink-0 flex items-center">
-                        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xl mr-2">L</div>
-                        <span class="font-bold text-xl tracking-tight text-indigo-900">Liujiandi</span>
+                        <!-- Logo 首字母改为 Z -->
+                        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xl mr-2">Z</div>
+                        <!-- 文字改为 zabuza -->
+                        <span class="font-bold text-xl tracking-tight text-indigo-900">zabuza</span>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">WebOS v2.3 CN</span>
+                    <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">WebOS v2.6 CN</span>
                 </div>
             </div>
         </div>
@@ -93,7 +94,8 @@
             <!-- 左侧：文字介绍 -->
             <div class="text-center md:text-left md:w-1/2">
                 <h1 class="text-4xl font-extrabold text-gray-900 mb-4">
-                    <span class="text-indigo-600">Liujiandi</span>
+                    <!-- 大标题改为 zabuza -->
+                    <span class="text-indigo-600">zabuza</span>
                 </h1>
                 <p class="text-gray-500 text-lg mb-8">
                     Don't let your dreams fade away
@@ -130,9 +132,14 @@
 
                     <!-- === 界面 1: 桌面 (Home Screen) === -->
                     <div id="view-home" class="app-view active-app flex-1 p-5 flex flex-col">
-                        <div class="mt-4 mb-8">
-                            <h2 class="text-2xl font-bold text-gray-800">下午好</h2>
-                            <p class="text-gray-500 text-sm">今天想做点什么？</p>
+                        <!-- 修改部分：替换原来的“下午好” -->
+                        <div class="mt-8 mb-10 text-center">
+                            <!-- 大时间显示 -->
+                            <h2 id="home-big-time" class="text-6xl font-bold text-gray-800 font-mono tracking-tighter leading-none">12:00</h2>
+                            <!-- 日期和农历显示 -->
+                            <p id="home-lunar-date" class="text-indigo-500 text-sm font-medium mt-3 tracking-wide bg-indigo-50 inline-block px-3 py-1 rounded-full">
+                                载入中...
+                            </p>
                         </div>
                         
                         <!-- App 图标网格 -->
@@ -182,12 +189,12 @@
                         <!-- 内容区域 -->
                         <div class="flex-1 flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
                             
-                            <!-- 装饰背景 -->
-                            <div class="absolute top-10 left-10 text-red-200 text-6xl opacity-20"><i class="ph-fill ph-star"></i></div>
-                            <div class="absolute bottom-20 right-10 text-red-200 text-8xl opacity-20"><i class="ph-fill ph-sparkle"></i></div>
+                            <!-- 装饰背景 (添加 pointer-events-none，防止遮挡按钮点击) -->
+                            <div class="absolute top-10 left-10 text-red-200 text-6xl opacity-20 pointer-events-none"><i class="ph-fill ph-star"></i></div>
+                            <div class="absolute bottom-20 right-10 text-red-200 text-8xl opacity-20 pointer-events-none"><i class="ph-fill ph-sparkle"></i></div>
 
                             <!-- 签筒区域 -->
-                            <div id="luck-container" class="relative mb-12 transition-transform">
+                            <div id="luck-container" class="relative mb-12 transition-transform z-10">
                                 <!-- 签筒主体 -->
                                 <div class="w-32 h-40 bg-gradient-to-b from-red-700 to-red-900 rounded-b-3xl rounded-t-lg border-4 border-yellow-500 shadow-2xl flex items-center justify-center relative z-10">
                                     <div class="w-20 h-20 bg-red-800 rounded-full flex items-center justify-center border-2 border-red-600">
@@ -205,11 +212,12 @@
                             </div>
 
                             <!-- 摇动时的文字提示 (闪烁) -->
-                            <div id="shuffling-text" class="h-8 text-red-400 font-bold text-lg mb-4 opacity-0"></div>
+                            <div id="shuffling-text" class="h-8 text-red-400 font-bold text-lg mb-4 opacity-0 relative z-10"></div>
 
-                            <!-- 摇一摇按钮 -->
-                            <button id="btn-shake" onclick="drawLuck()" class="bg-red-600 text-white px-10 py-4 rounded-full font-bold text-xl shadow-lg active:scale-95 transition flex items-center gap-2 border-b-4 border-red-800">
-                                <i class="ph-bold ph-hand-waving"></i> 摇一摇
+                            <!-- 摇一摇按钮 (添加 relative z-30 确保按钮在装饰层之上，覆盖整个点击区域) -->
+                            <button id="btn-shake" onclick="drawLuck()" class="relative z-30 bg-red-600 text-white px-10 py-4 rounded-full font-bold text-xl shadow-lg active:scale-95 transition flex items-center gap-2 border-b-4 border-red-800 cursor-pointer w-auto justify-center">
+                                <i class="ph-bold ph-hand-waving"></i> 
+                                <span>摇一摇</span>
                             </button>
                             <p class="mt-4 text-xs text-red-400">心诚则灵 ✨</p>
                         </div>
@@ -351,12 +359,73 @@
             openApp('home');
         }
 
-        // 更新顶部时间
-        setInterval(() => {
+        // 修改处：更复杂的时钟更新逻辑，包含农历修复
+        function updateClock() {
             const now = new Date();
+            
+            // 1. 状态栏时间 (小)
             const timeString = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
             document.getElementById('clock-time').textContent = timeString;
-        }, 1000);
+
+            // 2. 主屏幕大时间
+            const bigTimeEl = document.getElementById('home-big-time');
+            if(bigTimeEl) {
+                bigTimeEl.textContent = timeString;
+            }
+
+            // 3. 主屏幕农历和日期
+            const dateEl = document.getElementById('home-lunar-date');
+            if(dateEl) {
+                // 获取公历
+                const gregDate = now.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric', weekday: 'short' });
+                
+                // 获取农历 (利用 Intl API)
+                let lunarDateStr = "";
+                try {
+                    const formatter = new Intl.DateTimeFormat('zh-CN', { 
+                        calendar: 'chinese', 
+                        day: 'numeric', 
+                        month: 'long' 
+                    });
+                    const parts = formatter.formatToParts(now);
+                    
+                    let monthVal = "";
+                    let dayVal = "";
+                    
+                    parts.forEach(p => {
+                        if(p.type === 'month') monthVal = p.value;
+                        if(p.type === 'day') dayVal = p.value;
+                    });
+
+                    // 转换数字日为中文日
+                    const cnNums = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+                    const getDayName = (d) => {
+                        const n = parseInt(d);
+                        if (isNaN(n)) return d; 
+                        if (n <= 10) return '初' + cnNums[n - 1];
+                        if (n < 20) return '十' + cnNums[n - 11];
+                        if (n === 20) return '二十';
+                        if (n < 30) return '廿' + cnNums[n - 21];
+                        if (n === 30) return '三十';
+                        return n;
+                    };
+                    
+                    lunarDateStr = `${monthVal}${getDayName(dayVal)}`;
+                    
+                } catch(e) {
+                    lunarDateStr = ""; 
+                }
+                
+                if(lunarDateStr) {
+                    dateEl.textContent = `${gregDate} · ${lunarDateStr}`;
+                } else {
+                    dateEl.textContent = `${gregDate}`;
+                }
+            }
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock(); // 初始化调用
 
         // --- 2. 幸运签逻辑 (新替换的) ---
         let isShaking = false;
